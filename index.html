@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Basel III Bond Demand Visualizer | BondStats</title>
+  <meta
+    name="description"
+    content="Visualize how Basel III liquidity requirements may influence structural demand for government bonds through HQLA allocation."
+  />
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <main class="tool-shell">
+
+    <section class="hero-card">
+      <p class="eyebrow">BondStats Tool</p>
+      <h1>Basel III Bond Demand Visualizer</h1>
+      <p class="hero-text">
+        Explore how Basel III-style liquidity assumptions may influence structural demand for government bonds.
+        This tool estimates bond demand based on bank balance sheet size, liquidity buffer assumptions,
+        HQLA allocation, and sovereign bond weighting.
+      </p>
+    </section>
+
+    <section class="summary-grid">
+      <article class="summary-card summary-card-primary">
+        <span class="summary-label">Estimated Government Bond Demand</span>
+        <strong id="bondDemandValue" class="summary-value">$0.00T</strong>
+      </article>
+
+      <article class="summary-card">
+        <span class="summary-label">Required Liquidity Buffer</span>
+        <strong id="liquidityBufferValue" class="summary-value">$0.00T</strong>
+      </article>
+
+      <article class="summary-card">
+        <span class="summary-label">Estimated HQLA Stock</span>
+        <strong id="hqlaStockValue" class="summary-value">$0.00T</strong>
+      </article>
+
+      <article class="summary-card">
+        <span class="summary-label">Demand Intensity</span>
+        <strong id="demandStatusValue" class="summary-value status-moderate">Moderate</strong>
+      </article>
+    </section>
+
+    <section class="main-grid">
+      <section class="panel-card">
+        <div class="section-head">
+          <h2>Core Inputs</h2>
+          <p>
+            Enter simplified balance sheet and liquidity assumptions to estimate the implied demand for sovereign bonds.
+          </p>
+        </div>
+
+        <div class="form-grid">
+          <div class="field">
+            <label for="bankAssets">Total Bank Assets (USD trillions)</label>
+            <input id="bankAssets" type="number" step="0.1" value="10.0" />
+          </div>
+
+          <div class="field">
+            <label for="liquidityBufferPct">Liquidity Buffer (% of assets)</label>
+            <input id="liquidityBufferPct" type="number" step="0.1" value="15.0" />
+          </div>
+
+          <div class="field">
+            <label for="hqlaSharePct">HQLA Share of Liquidity Buffer (%)</label>
+            <input id="hqlaSharePct" type="number" step="0.1" value="80.0" />
+          </div>
+
+          <div class="field">
+            <label for="govBondSharePct">Government Bond Share of HQLA (%)</label>
+            <input id="govBondSharePct" type="number" step="0.1" value="70.0" />
+          </div>
+
+          <div class="field">
+            <label for="stressAdjustmentPct">Stress Adjustment to Buffer (%)</label>
+            <input id="stressAdjustmentPct" type="number" step="0.1" value="0.0" />
+          </div>
+
+          <div class="field">
+            <label for="regionLabel">Optional Label</label>
+            <input id="regionLabel" type="text" placeholder="e.g. Euro Area Banking System" />
+          </div>
+        </div>
+
+        <div class="button-row">
+          <button id="calculateBtn" class="primary-btn">Update Visualizer</button>
+          <button id="resetBtn" class="secondary-btn">Reset</button>
+        </div>
+      </section>
+
+      <section class="panel-card">
+        <div class="section-head">
+          <h2>Breakdown</h2>
+          <p>
+            See how the estimated bond demand is derived step by step.
+          </p>
+        </div>
+
+        <div class="breakdown-card">
+          <div class="breakdown-row">
+            <span>Total Bank Assets</span>
+            <strong id="assetsDisplay">$10.00T</strong>
+          </div>
+
+          <div class="breakdown-row">
+            <span>Liquidity Buffer</span>
+            <strong id="bufferDisplay">$1.50T</strong>
+          </div>
+
+          <div class="breakdown-row">
+            <span>Estimated HQLA</span>
+            <strong id="hqlaDisplay">$1.20T</strong>
+          </div>
+
+          <div class="breakdown-row breakdown-total">
+            <span>Estimated Government Bond Demand</span>
+            <strong id="govBondDisplay">$0.84T</strong>
+          </div>
+        </div>
+
+        <div class="interpretation-card">
+          <h3>Interpretation</h3>
+          <p id="interpretationText">
+            Under the selected assumptions, the banking system generates meaningful structural demand for government bonds through Basel-style liquidity buffers.
+          </p>
+        </div>
+      </section>
+    </section>
+
+    <section class="chart-grid">
+      <section class="chart-card">
+        <div class="section-head">
+          <h2>Demand Structure</h2>
+          <p>
+            Visual breakdown of assets, liquidity buffer, HQLA and government bond demand.
+          </p>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="compositionChart"></canvas>
+        </div>
+      </section>
+
+      <section class="chart-card">
+        <div class="section-head">
+          <h2>Scenario Sensitivity</h2>
+          <p>
+            Estimated government bond demand under different liquidity buffer assumptions.
+          </p>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="scenarioChart"></canvas>
+        </div>
+      </section>
+    </section>
+
+    <section class="scenario-card">
+      <div class="section-head">
+        <h2>Scenario Table</h2>
+        <p>
+          Compare how sovereign bond demand changes as liquidity assumptions tighten or loosen.
+        </p>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Scenario</th>
+              <th>Liquidity Buffer</th>
+              <th>Estimated HQLA</th>
+              <th>Government Bond Demand</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="scenarioTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="insight-grid">
+      <article class="info-card">
+        <h3>Why This Matters</h3>
+        <p>
+          Basel-style liquidity requirements can create structural demand for sovereign bonds because
+          government securities often play a central role in bank liquidity buffers.
+          This makes regulation an important driver of bond market demand.
+        </p>
+      </article>
+
+      <article class="info-card">
+        <h3>What This Tool Is</h3>
+        <p>
+          This is a simplified analytical visualizer designed to illustrate the directional relationship
+          between regulation, liquidity buffers and bond demand. It is not a regulatory reporting model.
+        </p>
+      </article>
+    </section>
+
+    <section class="methodology-card">
+      <div class="section-head">
+        <h2>Methodology</h2>
+      </div>
+
+      <p>
+        The tool estimates government bond demand using a simplified top-down framework:
+      </p>
+
+      <p class="formula">
+        Estimated Bond Demand = Total Assets × Liquidity Buffer × HQLA Share × Government Bond Share
+      </p>
+
+      <p>
+        A stress adjustment can be applied to the liquidity buffer to simulate tighter liquidity conditions.
+      </p>
+
+      <p class="disclaimer">
+        This BondStats visualizer is provided for informational and educational purposes only.
+        It is a simplified representation of market structure and should not be interpreted as regulatory,
+        legal, supervisory or investment advice.
+      </p>
+    </section>
+
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
